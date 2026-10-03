@@ -353,26 +353,30 @@ body.layout-mobile #album-grid > *{min-height:2.75rem}
 .rarity-rare{border-color:#3b82f6!important}
 .rarity-uncommon{border-color:#22c55e!important}
 .rarity-common{border-color:#6b7280!important}
+
+/* Álbum: 50 por página, rejilla fija sin secciones */
 #album-grid{
+  display:grid!important;
   grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:0.4rem;
+  gap:0.35rem;
+  overflow:visible;
 }
-@media(min-width:640px){#album-grid{grid-template-columns:repeat(8,minmax(0,1fr))}}
-@media(min-width:1024px){#album-grid{grid-template-columns:repeat(10,minmax(0,1fr))}}
-#album-grid .col-span-full{grid-column:1 / -1}
+@media(min-width:640px){#album-grid{grid-template-columns:repeat(10,minmax(0,1fr));gap:0.4rem}}
 #album-grid .inv-cell,
 #album-grid button.inv-cell,
 #album-grid .album-locked{
-  min-height:2.75rem!important;
-  height:2.75rem;
-  width:100%;
-  padding:0.15rem!important;
+  min-height:0!important;
+  height:auto;
   aspect-ratio:1;
+  width:100%;
+  padding:0.2rem!important;
+  border-radius:0.5rem;
 }
-#album-grid .inv-cell span{font-size:1.25rem!important;line-height:1}
-#album-grid .album-locked span{font-size:0.9rem!important;color:#4b5563}
-body.layout-mobile #album-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:0.35rem}
-body.layout-mobile #album-grid .inv-cell{min-height:2.5rem!important;height:2.5rem}
+#album-grid img.relic-icon{width:70%!important;height:70%!important;max-width:2.2rem;max-height:2.2rem}
+#album-grid .album-locked span{font-size:0.85rem!important;color:#4b5563}
+#album-pager{flex-shrink:0;padding:0.4rem 0}
+#tab-album{display:flex;flex-direction:column;gap:0.5rem}
+
 #album-pager{display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.5rem 0;flex-wrap:wrap}
 #album-pager button{min-width:2.5rem}
 
@@ -385,6 +389,48 @@ img.relic-icon{
 .shop-grid img.relic-icon, #shop-grid img.relic-icon{width:2.5rem;height:2.5rem}
 #prizes-body img.relic-icon{width:4.5rem;height:4.5rem}
 #detail-icon img.relic-icon, #item-detail img.relic-icon{width:3rem;height:3rem}
+
+
+/* Carrera: 5 caballos siempre visibles en móvil */
+.horse-list-grid{
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+}
+body.layout-mobile .horses-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0.4rem!important;
+  height:100%;
+  overflow:hidden!important;
+}
+body.layout-mobile .horses-layout > div:first-child{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:0.35rem;
+}
+body.layout-mobile #horse-list{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:0.25rem;
+}
+body.layout-mobile .horse-sel{
+  padding:0.3rem 0.45rem!important;
+  flex:1 1 0;
+  min-height:2.4rem;
+  max-height:3rem;
+}
+body.layout-mobile .horses-layout .game-controls{
+  flex:0 0 auto;
+}
+body.layout-mobile #bet-indicator{padding:0.35rem!important;font-size:0.7rem!important}
+body.layout-pc .horse-list-grid{gap:0.45rem}
 
 </style>
 </head>
@@ -1335,7 +1381,7 @@ function relicIconHtml(itemOrId, extraClass) {
 const ALBUM_SLOTS = 500;
 
 let albumPage = 0;
-const ALBUM_PER_PAGE = 100;
+const ALBUM_PER_PAGE = 50;
 const lastBet = { slots: 0, bj: 0, poker: 0, horses: 0, rouletteChip: 1 };
 
 const S = {
@@ -2153,27 +2199,19 @@ function renderAlbum() {
   const found = new Map((S.discovered || []).filter(d => d.catalogId != null).map(d => [d.catalogId, d]));
 
   let html = '';
-  let lastR = null;
   for (let slot = startIdx; slot < endIdx; slot++) {
     const base = RELIC_CATALOG[slot];
-    const d = found.get(slot);
-    if (d && base) {
-      if (base.rarity !== lastR) {
-        lastR = base.rarity;
-        html += `<div class="col-span-full text-[9px] uppercase tracking-wider font-bold mt-1 mb-0.5" style="color:${base.color}">${base.rarityName}</div>`;
-      }
-      html += `<button type="button" data-album="${slot}" class="inv-cell glass rounded-lg border-2 rarity-${base.rarity} flex items-center justify-center active:scale-95 transition">
+    if (found.has(slot) && base) {
+      html += `<button type="button" data-album="${slot}" class="inv-cell glass rounded-lg border-2 rarity-${base.rarity} flex items-center justify-center active:scale-95 transition" title="${base.name}">
         ${relicIconHtml(slot)}
       </button>`;
     } else {
-      if (lastR !== 'empty') {
-        lastR = 'empty';
-        html += `<div class="col-span-full text-[9px] uppercase tracking-wider font-bold text-gray-600 mt-1 mb-0.5">Sin descubrir</div>`;
-      }
-      html += `<div class="inv-cell album-locked glass rounded-lg border border-gray-800 flex items-center justify-center"><span class="font-bold">?</span></div>`;
+      html += `<div class="inv-cell album-locked glass rounded-lg border border-gray-800 flex items-center justify-center"><span class="font-bold text-gray-600">?</span></div>`;
     }
   }
+  // Rellenar si la última página tiene menos de 50 (no hace falta, endIdx ya corta)
   g.innerHTML = html;
+
   const pageNum = document.getElementById('album-page-num');
   const pageTot = document.getElementById('album-page-total');
   if (pageNum) pageNum.textContent = String(albumPage + 1);
@@ -2184,8 +2222,8 @@ function renderAlbum() {
       ev.preventDefault();
       ev.stopPropagation();
       const slot = +btn.getAttribute('data-album');
-      const item = found.get(slot) || RELIC_CATALOG[slot];
-      if (!item || !found.has(slot)) return;
+      const item = found.get(slot);
+      if (!item) return;
       try { sfx('click'); } catch (e) {}
       const panel = document.getElementById('prizes-panel');
       const body = document.getElementById('prizes-body');
@@ -2194,7 +2232,7 @@ function renderAlbum() {
       if (title) title.textContent = 'Reliquia #' + String(slot + 1).padStart(3, '0');
       body.innerHTML = `
         <div class="text-center mb-4">
-          <div class="flex justify-center mb-2">${relicIconHtml(item, "relic-icon-lg")}</div>
+          <div class="flex justify-center mb-2">${relicIconHtml(item)}</div>
           <div class="font-cinzel text-xl text-gold-300 font-bold">${item.name}</div>
           <div class="text-sm font-semibold mt-1" style="color:${item.color}">${item.rarityName}</div>
         </div>
@@ -2822,15 +2860,15 @@ function renderHorses(body) {
         <div id="bet-indicator" class="text-center text-xs font-semibold text-gold-300 bg-gold-500/10 border border-gold-500/30 rounded-lg py-1.5">
           Apostando por: <span class="text-white">#${horses[selected].num} ${horses[selected].name}</span>
         </div>
-        <div id="horse-list" class="space-y-2">
+        <div id="horse-list" class="horse-list-grid">
           ${horses.map((h,i)=>`
-            <button data-h="${i}" class="horse-sel w-full flex items-center gap-3 p-3 rounded-xl border-2 ${selected===i?'border-gold-400 bg-gold-500/10 picked':'border-white/10 bg-black/40'} text-left">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-lg" style="background:${h.color}33;color:${h.color}">${h.num}</div>
-              <div class="flex-1">
-                <div class="font-bold text-sm">${h.name}</div>
-                <div class="text-[10px] text-gray-500">Caballo #${h.num}${selected===i?' · TU APUESTA':''}</div>
+            <button type="button" data-h="${i}" class="horse-sel w-full flex items-center gap-2 px-2 py-1.5 rounded-lg border-2 ${selected===i?'border-gold-400 bg-gold-500/10 picked':'border-white/10 bg-black/40'} text-left">
+              <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center font-black text-sm" style="background:${h.color}33;color:${h.color}">${h.num}</div>
+              <div class="flex-1 min-w-0">
+                <div class="font-bold text-xs truncate">${h.name}</div>
+                <div class="text-[9px] text-gray-500">#${h.num}${selected===i?' · TU APUESTA':''}</div>
               </div>
-              <div class="text-2xl">${selected===i?'⭐':'🏇'}</div>
+              <div class="text-base shrink-0">${selected===i?'⭐':'🏇'}</div>
             </button>
           `).join('')}
         </div>
