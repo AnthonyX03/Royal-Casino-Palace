@@ -1,1 +1,4 @@
-Place your 'Royal Casino Palace.mp3' file in this folder.
+Coloca aquí:
+  Royal Casino Palace1.mp3
+  Royal Casino Palace2.mp3
+La lista se repite en bucle.
