@@ -157,13 +157,15 @@ body.layout-pc #hub-main{
   max-height:calc(100dvh - 7.5rem)!important;
 }
 #tab-inventory,
-#tab-album,
 #tab-play,
 #tab-stats{
   overflow:visible!important;
 }
+#tab-album{
+  overflow:hidden!important;
+}
 #album-grid{
-  overflow:visible!important;
+  overflow:hidden!important;
 }
 
 /* Sin scroll SOLO dentro de los juegos */
@@ -344,8 +346,8 @@ body.layout-mobile .horses-layout{
 }
 
 
-#album-grid > *{min-height:3.25rem}
-body.layout-mobile #album-grid > *{min-height:2.75rem}
+/* album cell size via grid */
+/* mobile album via grid */
 #tab-inventory .equip-slot, #tab-inventory #backpack-grid > *{min-height:3.5rem}
 .rarity-cursed{border-color:#ef4444!important;box-shadow:0 0 12px rgba(239,68,68,.35)}
 .rarity-legendary{border-color:#f59e0b!important}
@@ -354,28 +356,6 @@ body.layout-mobile #album-grid > *{min-height:2.75rem}
 .rarity-uncommon{border-color:#22c55e!important}
 .rarity-common{border-color:#6b7280!important}
 
-/* Álbum: 50 por página, rejilla fija sin secciones */
-#album-grid{
-  display:grid!important;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:0.35rem;
-  overflow:visible;
-}
-@media(min-width:640px){#album-grid{grid-template-columns:repeat(10,minmax(0,1fr));gap:0.4rem}}
-#album-grid .inv-cell,
-#album-grid button.inv-cell,
-#album-grid .album-locked{
-  min-height:0!important;
-  height:auto;
-  aspect-ratio:1;
-  width:100%;
-  padding:0.2rem!important;
-  border-radius:0.5rem;
-}
-#album-grid img.relic-icon{width:70%!important;height:70%!important;max-width:2.2rem;max-height:2.2rem}
-#album-grid .album-locked span{font-size:0.85rem!important;color:#4b5563}
-#album-pager{flex-shrink:0;padding:0.4rem 0}
-#tab-album{display:flex;flex-direction:column;gap:0.5rem}
 
 #album-pager{display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.5rem 0;flex-wrap:wrap}
 #album-pager button{min-width:2.5rem}
@@ -384,7 +364,6 @@ img.relic-icon{
   width:1.6rem;height:1.6rem;object-fit:contain;display:block;margin:0 auto;
   image-rendering:auto;pointer-events:none;
 }
-#album-grid img.relic-icon{width:1.85rem;height:1.85rem}
 .inv-cell img.relic-icon{width:1.75rem;height:1.75rem}
 .shop-grid img.relic-icon, #shop-grid img.relic-icon{width:2.5rem;height:2.5rem}
 #prizes-body img.relic-icon{width:4.5rem;height:4.5rem}
@@ -431,6 +410,91 @@ body.layout-mobile .horses-layout .game-controls{
 }
 body.layout-mobile #bet-indicator{padding:0.35rem!important;font-size:0.7rem!important}
 body.layout-pc .horse-list-grid{gap:0.45rem}
+
+
+.tab-panel.hidden{display:none!important}
+#tab-album.hidden,#tab-play.hidden,#tab-inventory.hidden,#tab-shop.hidden,#tab-stats.hidden{display:none!important}
+
+/* Álbum compacto: 50 casillas, sin scroll */
+#tab-album:not(.hidden){
+  display:flex!important;
+  flex-direction:column;
+  gap:0.3rem;
+  height:100%;
+  max-height:100%;
+  min-height:0;
+  overflow:hidden!important;
+}
+#album-grid{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  grid-template-rows:repeat(10,minmax(0,1fr));
+  gap:0.2rem;
+  flex:1 1 auto;
+  min-height:0;
+  max-height:100%;
+  overflow:hidden!important;
+  align-content:start;
+}
+@media(min-width:640px){
+  #album-grid{
+    grid-template-columns:repeat(10,minmax(0,1fr));
+    grid-template-rows:repeat(5,minmax(0,1fr));
+    gap:0.3rem;
+  }
+}
+#album-grid .inv-cell,
+#album-grid button.inv-cell,
+#album-grid .album-locked{
+  min-height:0!important;
+  height:100%!important;
+  max-height:2.4rem;
+  width:100%;
+  padding:0.1rem!important;
+  border-radius:0.35rem;
+  aspect-ratio:1;
+}
+#album-grid img.relic-icon{
+  width:1.15rem!important;
+  height:1.15rem!important;
+  max-width:1.35rem!important;
+  max-height:1.35rem!important;
+}
+#album-grid .album-locked span{font-size:0.7rem!important;color:#4b5563}
+#album-pager{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.5rem;
+  padding:0.25rem 0;
+}
+#tab-album .album-header{flex:0 0 auto}
+
+
+#hub-main.album-mode{
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column;
+}
+#hub-main.album-mode #tab-album:not(.hidden){
+  flex:1;
+  min-height:0;
+}
+/* Casillas aún más compactas en móvil */
+body.layout-mobile #album-grid .inv-cell,
+body.layout-mobile #album-grid button.inv-cell,
+body.layout-mobile #album-grid .album-locked{
+  max-height:1.85rem!important;
+  padding:0.05rem!important;
+}
+body.layout-mobile #album-grid img.relic-icon{
+  width:0.95rem!important;
+  height:0.95rem!important;
+}
+body.layout-mobile #album-grid{
+  gap:0.15rem!important;
+}
 
 </style>
 </head>
@@ -596,18 +660,18 @@ body.layout-pc .horse-list-grid{gap:0.45rem}
     </div>
 
     <!-- ALBUM TAB -->
-    <div id="tab-album" class="tab-panel hidden space-y-3">
-      <div class="flex items-center justify-between">
+    <div id="tab-album" class="tab-panel hidden">
+      <div class="album-header flex items-center justify-between mb-1">
         <div>
-          <h2 class="font-cinzel text-lg font-bold text-gold-400">Álbum de Reliquias</h2>
-          <p class="text-[10px] text-gray-500">Descubre amuletos jugando. Los desconocidos aparecen como ?</p>
+          <h2 class="font-cinzel text-base font-bold text-gold-400">Álbum</h2>
+          <p class="text-[9px] text-gray-500">50 por página · toca para ver</p>
         </div>
         <div class="text-right text-xs">
           <div class="text-gray-500">Descubiertos</div>
-          <div class="font-bold text-white"><span id="album-count">0</span> / <span id="album-total">48</span></div>
+          <div class="font-bold text-white"><span id="album-count">0</span>/<span id="album-total">500</span></div>
         </div>
       </div>
-      <div id="album-grid" class="grid gap-1.5"></div>
+      <div id="album-grid"></div>
       <div id="album-pager" class="text-sm">
         <button type="button" id="album-prev" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-white/10 text-gold-300 font-bold">‹</button>
         <span class="text-gray-400">Página <span id="album-page-num" class="text-white font-bold">1</span> / <span id="album-page-total">5</span></span>
@@ -3080,14 +3144,34 @@ function switchTab(tabName) {
     b.classList.remove('active-tab');
     b.classList.add('text-gray-400');
   });
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.add('hidden');
+    p.style.display = 'none';
+  });
   const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
   const panel = document.getElementById('tab-' + tabName);
   if (btn) {
     btn.classList.add('active-tab');
     btn.classList.remove('text-gray-400');
   }
-  if (panel) panel.classList.remove('hidden');
+  if (panel) {
+    panel.classList.remove('hidden');
+    panel.style.display = '';
+  }
+  // Álbum: sin scroll en main; otras pestañas sí pueden
+  const main = document.getElementById('hub-main');
+  if (main) {
+    if (tabName === 'album') {
+      main.style.overflowY = 'hidden';
+      main.classList.add('album-mode');
+    } else {
+      main.style.overflowY = 'auto';
+      main.classList.remove('album-mode');
+    }
+  }
+  if (tabName === 'album') {
+    try { renderAlbum(); } catch (e) {}
+  }
   try { sfx('click'); } catch (e) {}
 }
 
