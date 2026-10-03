@@ -91,6 +91,30 @@ body.layout-mobile .intro-card{width:min(100%,26rem);max-height:92dvh}
 .equip-slot{min-height:64px;border:2px dashed rgba(234,179,8,.35)}
 .equip-slot.filled{border-style:solid}
 .paytable{font-size:11px;color:#a8a29e}
+
+/* Cartas — Poker y Blackjack: siempre visibles y adaptadas a móvil */
+.card-face{
+  background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 100%)!important;
+  color:#111827;
+  border:2px solid rgba(255,255,255,.9)!important;
+  border-radius:10px!important;
+  box-shadow:0 3px 8px rgba(0,0,0,.45),inset 0 0 0 1px rgba(15,23,42,.12);
+  flex:0 0 auto;
+  overflow:hidden;
+  position:relative;
+}
+.card-face.text-red-600{color:#dc2626!important}
+#pk-cards{overflow:visible;flex-wrap:nowrap;min-width:0}
+#pk-cards .card-face{width:clamp(46px,14vw,54px)!important;height:clamp(64px,20vw,74px)!important;font-size:clamp(.78rem,3.5vw,.9rem)!important}
+#pk-cards .card-face .text-\[8px\]{line-height:1}
+.bj-card{width:clamp(46px,14vw,52px)!important;height:clamp(62px,19vw,70px)!important;font-size:clamp(.78rem,3.5vw,.9rem)!important}
+.bj-card .text-base{font-size:1rem!important}
+body.layout-mobile #pk-cards{gap:clamp(3px,1.4vw,6px)!important}
+body.layout-mobile .card-face{box-shadow:0 2px 7px rgba(0,0,0,.5),inset 0 0 0 1px rgba(15,23,42,.12)}
+@media (max-width:360px){
+  #pk-cards .card-face{width:45px!important;height:63px!important}
+  .bj-card{width:45px!important;height:61px!important}
+}
 .paytable b{color:#facc15}
 .album-locked{opacity:.35;filter:grayscale(1)}
 
@@ -429,9 +453,11 @@ img.relic-icon{
 }
 .horses-controls{flex:0 0 auto;max-height:42%;overflow:hidden}
 body.layout-mobile .horses-controls{flex:0 0 auto;max-height:none;overflow:visible}
-body.layout-mobile .horse-sel{min-height:clamp(2.15rem,5.2vh,2.75rem);max-height:clamp(2.45rem,6.5vh,3.1rem);padding:0.24rem 0.45rem!important}
-body.layout-mobile .horse-list-grid{gap:0.34rem}
-body.layout-mobile .horse-track{height:34px}
+body.layout-mobile .horse-sel{min-height:clamp(2.3rem,5.8vh,3rem);max-height:clamp(2.55rem,7vh,3.25rem);padding:0.28rem 0.5rem!important}
+body.layout-mobile .horse-list-grid{gap:clamp(0.32rem,0.7vh,0.45rem)}
+body.layout-mobile .horse-track{height:clamp(36px,5.5vh,42px)}
+body.layout-mobile .horse-sel .w-7{width:2rem!important;height:2rem!important}
+body.layout-mobile .horse-sel .text-lg{font-size:1.35rem!important}
 body.layout-mobile .bet-indicator{font-size:0.68rem!important;padding:0.25rem 0.35rem!important}
 body.layout-mobile .race-msg{font-size:0.68rem!important}
 body.layout-mobile .horses-controls .numpad-btn{padding:0!important;height:1.85rem!important;min-height:1.85rem!important}
@@ -439,6 +465,12 @@ body.layout-mobile .horses-controls #np-display{font-size:1.15rem!important;marg
 body.layout-mobile .horses-controls .glass{padding:0.4rem!important;margin-bottom:0.25rem!important}
 body.layout-mobile .horses-controls #np-go{padding-top:0.65rem!important;padding-bottom:0.65rem!important;font-size:0.95rem!important}
 body.layout-mobile .horses-controls .grid.grid-cols-4{margin-top:0.35rem!important}
+@media (max-height:600px){
+  body.layout-mobile .horse-sel{min-height:2.15rem;max-height:2.65rem;padding:0.2rem 0.42rem!important}
+  body.layout-mobile .horse-sel .w-7{width:1.8rem!important;height:1.8rem!important}
+  body.layout-mobile .horse-track{height:34px}
+  body.layout-mobile .horse-sel .text-lg{font-size:1.2rem!important}
+}
 body.layout-pc .horse-list-grid{gap:0.4rem}
 body.layout-pc .horse-sel{min-height:2.6rem;max-height:none;flex:0 0 auto}
 
@@ -718,7 +750,7 @@ body.layout-mobile #album-grid{
           <p class="text-[11px] text-gray-500">5 reliquias. Se renueva gratis en cada cobro.</p>
         </div>
         <button id="btn-shop-reroll" class="px-3 py-2 rounded-xl bg-slate-800 border border-gold-500/30 text-xs font-bold text-gold-300">
-          <i class="fa-solid fa-dice mr-1"></i>Rerolear <span id="shop-reroll-cost">100</span>€
+          <i class="fa-solid fa-dice mr-1"></i>Rerolear <span id="shop-reroll-cost">100 €</span>
         </button>
       </div>
       <div id="shop-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
@@ -1522,7 +1554,7 @@ const ABILITY_DEFS = [
   { key:'critChance', label:v=>`Crítico ${Math.round(v*100)}% (×2)`, gen:r=>+(0.06 + r*0.06 + Math.random()*0.05).toFixed(3) },
   { key:'freeSpin', label:v=>`Giro gratis ${Math.round(v*100)}%`, gen:r=>+(0.06 + r*0.05 + Math.random()*0.05).toFixed(3) },
   { key:'dropBoost', label:v=>`Más reliquias +${Math.round(v*100)}%`, gen:r=>+(0.1 + r*0.1 + Math.random()*0.08).toFixed(3) },
-  { key:'startBoost', label:v=>`+${v}€ al ganar`, gen:r=>Math.floor(8 + r*35 + Math.random()*25) },
+  { key:'startBoost', label:v=>`+${fmt(v)} al ganar`, gen:r=>Math.floor(8 + r*35 + Math.random()*25) },
   { key:'insurance', label:v=>`Seguro apuesta ${Math.round(v*100)}%`, gen:r=>+(0.08 + r*0.08 + Math.random()*0.06).toFixed(3) },
   { key:'allGames', label:v=>`Todos los juegos ×${v.toFixed(2)}`, gen:r=>+(1.1 + r*0.12 + Math.random()*0.1).toFixed(2) },
   { key:'equipSlots', label:v=>`+${v} ranura(s) de equipo`, gen:r=>Math.max(1, 1 + (r >= 2 ? 1 : 0) + (r >= 4 ? 1 : 0)) },
@@ -1979,10 +2011,19 @@ function rollShop(free) {
   save();
 }
 
+function localizeCurrencyText(text) {
+  if (text == null) return '';
+  return String(text).replace(/([+−-]?\d+(?:[.,]\d+)?)\s*€/g, (match, amount) => {
+    const clean = amount.replace(',', '.');
+    const shown = Number.isFinite(Number(clean)) ? Math.floor(Number(clean)).toLocaleString('es-ES') : amount;
+    return S.settings && S.settings.currency === 'USD' ? ('$ ' + shown) : (shown + ' €');
+  });
+}
+
 function renderShop() {
   const g = document.getElementById('shop-grid');
   const costEl = document.getElementById('shop-reroll-cost');
-  if (costEl) costEl.textContent = shopRerollCost();
+  if (costEl) costEl.textContent = fmt(shopRerollCost());
   if (!g) return;
   if (!S.shop || !S.shop.length) { rollShop(true); return; }
   g.innerHTML = S.shop.map((it, idx) => `
@@ -1991,8 +2032,8 @@ function renderShop() {
       <div class="flex-1 min-w-0">
         <div class="font-bold text-sm text-white truncate">${it.name}</div>
         <div class="text-[10px] font-semibold" style="color:${it.color}">${it.rarityName}</div>
-        <div class="text-[11px] text-emerald-300 mt-1">${it.effectsText}</div>
-        <div class="text-[10px] text-gray-500 mt-1 line-clamp-2">${it.desc}</div>
+        <div class="text-[11px] text-emerald-300 mt-1">${localizeCurrencyText(it.effectsText)}</div>
+        <div class="text-[10px] text-gray-500 mt-1 line-clamp-2">${localizeCurrencyText(it.desc)}</div>
         <button data-shop-buy="${idx}" class="mt-2 px-3 py-1.5 rounded-lg bg-emerald-700 text-xs font-bold text-white">Comprar ${fmt(it.buy)}</button>
       </div>
     </div>
@@ -2276,8 +2317,8 @@ function showDetail(it, isEquipped) {
   document.getElementById('detail-name').textContent = it.name;
   document.getElementById('detail-rarity').textContent = it.rarityName;
   document.getElementById('detail-rarity').style.color = it.color;
-  document.getElementById('detail-desc').textContent = it.desc;
-  document.getElementById('detail-effects').textContent = it.effectsText;
+  document.getElementById('detail-desc').textContent = localizeCurrencyText(it.desc);
+  document.getElementById('detail-effects').textContent = localizeCurrencyText(it.effectsText);
   document.getElementById('detail-value').textContent = 'Venta: ' + fmt(it.sell);
   document.getElementById('btn-equip').classList.toggle('hidden', isEquipped);
   document.getElementById('btn-unequip').classList.toggle('hidden', !isEquipped);
@@ -2432,7 +2473,7 @@ function wireNumpad(onConfirm, startVal) {
   const go = document.getElementById('np-go');
   if (go) go.onclick = () => {
     const n = parseInt(val,10)||0;
-    if (n<1) return floatTxt('Apuesta mínima 1 €','text-rose-400');
+    if (n<1) return floatTxt('Apuesta mínima ' + fmt(1), 'text-rose-400');
     if (n>S.money) return floatTxt('Fondos insuficientes','text-rose-400');
     onConfirm(n);
   };
@@ -2629,8 +2670,8 @@ function handVal(h){
   return t;
 }
 function cardHtml(c,hide){
-  if(hide) return `<div class="w-12 h-16 rounded-md bg-slate-800 border-2 border-gold-600 flex items-center justify-center text-gold-500 text-lg">🂠</div>`;
-  return `<div class="card-face w-12 h-16 flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'}"><span>${c.v}</span><span class="text-base">${c.s}</span></div>`;
+  if(hide) return `<div class="bj-card w-12 h-16 rounded-md bg-slate-800 border-2 border-gold-600 flex items-center justify-center text-gold-500 text-lg">🂠</div>`;
+  return `<div class="card-face bj-card w-12 h-16 flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'}"><span>${c.v}</span><span class="text-base">${c.s}</span></div>`;
 }
 
 function renderBJ(body) {
@@ -2912,7 +2953,7 @@ function renderPoker(body) {
           <div class="text-[10px] text-green-300/60 mb-2 text-center">${phase==='hold'?'Toca para MANTENER':'Tu mano'}</div>
           <div id="pk-cards" class="flex justify-center gap-1.5 min-h-[70px]">
             ${(hand||[]).map((c,i)=>`
-              <button data-i="${i}" class="card-face w-[52px] h-[72px] flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'} ${holds&&holds[i]?'ring-2 ring-gold-400 scale-105':''}">
+              <button data-i="${i}" class="card-face flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'} ${holds&&holds[i]?'ring-2 ring-gold-400 scale-105':''}">
                 ${holds&&holds[i]?'<span class="text-[8px] text-amber-600 font-black">HOLD</span>':''}
                 <span>${c.v}</span><span>${c.s}</span>
               </button>`).join('')||'—'}
