@@ -370,46 +370,75 @@ img.relic-icon{
 #detail-icon img.relic-icon, #item-detail img.relic-icon{width:3rem;height:3rem}
 
 
-/* Carrera: 5 caballos siempre visibles en móvil */
-.horse-list-grid{
+/* Carrera de caballos — móvil sin cortes ni scroll */
+.horses-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100%;
+  min-height:0;
+  gap:0.4rem;
+  overflow:hidden!important;
+}
+.horses-top{
+  flex:1 1 auto;
+  min-height:0;
   display:flex;
   flex-direction:column;
   gap:0.3rem;
-}
-body.layout-mobile .horses-layout{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:0.4rem!important;
-  height:100%;
-  overflow:hidden!important;
-}
-body.layout-mobile .horses-layout > div:first-child{
-  flex:1 1 auto;
-  min-height:0;
   overflow:hidden;
+}
+.horse-list-grid{
   display:flex;
   flex-direction:column;
-  gap:0.35rem;
-}
-body.layout-mobile #horse-list{
+  gap:0.28rem;
   flex:1 1 auto;
   min-height:0;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  gap:0.25rem;
 }
-body.layout-mobile .horse-sel{
-  padding:0.3rem 0.45rem!important;
+.horse-sel{
+  box-sizing:border-box!important;
+  border-width:2px!important;
   flex:1 1 0;
-  min-height:2.4rem;
-  max-height:3rem;
+  min-height:2.35rem;
+  max-height:3.1rem;
 }
-body.layout-mobile .horses-layout .game-controls{
-  flex:0 0 auto;
+.horse-sel.picked{box-shadow:0 0 0 1px #facc15 inset,0 0 12px rgba(250,204,21,.25)}
+.race-track-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:0.28rem;
+  flex:1 1 auto;
+  min-height:0;
 }
-body.layout-mobile #bet-indicator{padding:0.35rem!important;font-size:0.7rem!important}
-body.layout-pc .horse-list-grid{gap:0.45rem}
+.race-row{width:100%;min-width:0}
+.horse-track{
+  position:relative;
+  height:36px;
+  background:linear-gradient(90deg,#1a3a1a,#0d1f0d);
+  border-radius:8px;
+  overflow:hidden;
+  border:1px solid #2a5a2a;
+}
+.horse-runner{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  transition:left 0.08s linear;
+  font-size:1.35rem;
+  filter:drop-shadow(0 2px 3px #000);
+  line-height:1;
+}
+.horses-controls{flex:0 0 auto;max-height:42%;overflow:hidden}
+body.layout-mobile .horses-controls{max-height:38%}
+body.layout-mobile .horse-sel{min-height:2.15rem;max-height:2.7rem;padding:0.25rem 0.4rem!important}
+body.layout-mobile .horse-track{height:32px}
+body.layout-mobile .bet-indicator{font-size:0.7rem!important;padding:0.3rem 0.4rem!important}
+body.layout-mobile .race-msg{font-size:0.7rem!important}
+body.layout-mobile .horses-controls .numpad-btn{padding:0.35rem 0!important;height:2.15rem!important}
+body.layout-mobile .horses-controls #np-display{font-size:1.25rem!important;margin-bottom:0.25rem!important}
+body.layout-mobile .horses-controls .glass{padding:0.5rem!important;margin-bottom:0.35rem!important}
+body.layout-pc .horse-list-grid{gap:0.4rem}
+body.layout-pc .horse-sel{min-height:2.6rem;max-height:none;flex:0 0 auto}
+
 
 
 .tab-panel.hidden{display:none!important}
@@ -2944,123 +2973,142 @@ const HORSE_COLORS = ['#e11d48','#3b82f6','#eab308','#22c55e','#a855f7'];
 function renderHorses(body) {
   const used = new Set();
   const horses = [];
-  for (let i=0;i<5;i++) {
+  for (let i = 0; i < 5; i++) {
     let name;
-    do { name = pick(HORSE_A)+' '+pick(HORSE_B); } while(used.has(name));
+    do { name = pick(HORSE_A) + ' ' + pick(HORSE_B); } while (used.has(name));
     used.add(name);
-    horses.push({ id:i, name, color:HORSE_COLORS[i], num:i+1, speed:0.7+Math.random()*0.5 });
+    horses.push({ id: i, name, color: HORSE_COLORS[i], num: i + 1, speed: 0.7 + Math.random() * 0.5 });
   }
   let selected = 0;
   let racing = false;
 
+  function refreshSelectionUI() {
+    document.querySelectorAll('.horse-sel').forEach((b, i) => {
+      const on = i === selected;
+      b.classList.toggle('border-gold-400', on);
+      b.classList.toggle('bg-gold-500/10', on);
+      b.classList.toggle('picked', on);
+      b.classList.toggle('border-white/10', !on);
+      b.classList.toggle('bg-black/40', !on);
+      const sub = b.querySelector('[data-sub]');
+      if (sub) sub.textContent = '#' + horses[i].num + (on ? ' · TU APUESTA' : '');
+    });
+    const ind = document.getElementById('bet-indicator');
+    if (ind) ind.innerHTML = 'Apostando por: <span class="text-white">#' + horses[selected].num + ' ' + horses[selected].name + '</span>';
+  }
+
   function ui() {
     body.innerHTML = `
       <div class="horses-layout">
-        <div class="space-y-2 min-h-0 overflow-hidden">
-        ${paytableBox([
-          ['1º puesto (tu caballo)','×3.5 neto aprox.'],
-          ['Cualquier otro','Pierdes apuesta']
-        ])}
-        <div id="bet-indicator" class="text-center text-xs font-semibold text-gold-300 bg-gold-500/10 border border-gold-500/30 rounded-lg py-1.5">
-          Apostando por: <span class="text-white">#${horses[selected].num} ${horses[selected].name}</span>
+        <div class="horses-top min-h-0 overflow-hidden">
+          <div id="bet-indicator" class="bet-indicator text-center text-xs font-semibold text-gold-300 bg-gold-500/10 border border-gold-500/30 rounded-lg py-1.5 px-2">
+            Apostando por: <span class="text-white">#${horses[selected].num} ${horses[selected].name}</span>
+          </div>
+          <div id="horse-list" class="horse-list-grid">
+            ${horses.map((h, i) => `
+              <button type="button" data-h="${i}" class="horse-sel w-full flex items-center gap-2 px-2 py-1.5 rounded-lg border-2 box-border ${selected === i ? 'border-gold-400 bg-gold-500/10 picked' : 'border-white/10 bg-black/40'} text-left">
+                <div class="w-7 h-7 shrink-0 rounded-full flex items-center justify-center font-black text-sm" style="background:${h.color}33;color:${h.color}">${h.num}</div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-bold text-xs truncate leading-tight">${h.name}</div>
+                  <div data-sub class="text-[9px] text-gray-500 leading-tight">#${h.num}${selected === i ? ' · TU APUESTA' : ''}</div>
+                </div>
+                <div class="text-lg shrink-0 leading-none">🏇</div>
+              </button>
+            `).join('')}
+          </div>
+          <div id="race-track" class="race-track-wrap hidden"></div>
+          <div id="race-msg" class="race-msg text-center text-xs font-bold min-h-[1.1rem] px-1 leading-tight"></div>
         </div>
-        <div id="horse-list" class="horse-list-grid">
-          ${horses.map((h,i)=>`
-            <button type="button" data-h="${i}" class="horse-sel w-full flex items-center gap-2 px-2 py-1.5 rounded-lg border-2 ${selected===i?'border-gold-400 bg-gold-500/10 picked':'border-white/10 bg-black/40'} text-left">
-              <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center font-black text-sm" style="background:${h.color}33;color:${h.color}">${h.num}</div>
-              <div class="flex-1 min-w-0">
-                <div class="font-bold text-xs truncate">${h.name}</div>
-                <div class="text-[9px] text-gray-500">#${h.num}${selected===i?' · TU APUESTA':''}</div>
-              </div>
-              <div class="text-base shrink-0">${selected===i?'⭐':'🏇'}</div>
-            </button>
-          `).join('')}
-        </div>
-        <div id="race-track" class="hidden space-y-2"></div>
-        <div id="race-msg" class="text-center font-bold min-h-[1.3rem]"></div>
-        </div>
-        <div class="space-y-2 game-controls min-h-0 overflow-hidden">
-          <div id="h-bet">${buildNumpad(lastBet.horses)}</div>
+        <div class="game-controls horses-controls min-h-0 overflow-hidden">
+          <div id="h-bet">${buildNumpad(lastBet.horses || 0)}</div>
         </div>
       </div>`;
-    document.querySelectorAll('.horse-sel').forEach(btn=>{
-      btn.onclick=()=>{
-        if(racing) return;
+
+    document.querySelectorAll('.horse-sel').forEach(btn => {
+      btn.onclick = () => {
+        if (racing) return;
         sfx('click');
         selected = +btn.dataset.h;
-        document.querySelectorAll('.horse-sel').forEach((b,i)=>{
-          const on = i===selected;
-          b.classList.toggle('border-gold-400', on);
-          b.classList.toggle('bg-gold-500/10', on);
-          b.classList.toggle('picked', on);
-          b.classList.toggle('border-white/10', !on);
-          b.classList.toggle('bg-black/40', !on);
-          const star = b.querySelector('.text-2xl');
-          if (star) star.textContent = on ? '⭐' : '🏇';
-          const sub = b.querySelector('.text-\\[10px\\]');
-          if (sub) sub.textContent = `Caballo #${horses[i].num}` + (on ? ' · TU APUESTA' : '');
-        });
-        const ind = document.getElementById('bet-indicator');
-        if (ind) ind.innerHTML = `Apostando por: <span class="text-white">#${horses[selected].num} ${horses[selected].name}</span>`;
+        refreshSelectionUI();
       };
     });
-    wireNumpad((bet)=>{
-      if(racing) return;
-      lastBet.horses=bet;
-      racing=true;
-      S.money-=bet; S.stats.games++; updateHub(); save();
-      document.getElementById('h-bet').style.pointerEvents='none';
+
+    wireNumpad((bet) => {
+      if (racing) return;
+      if (bet <= 0) return floatTxt('Elige apuesta', 'text-amber-400');
+      if (bet > S.money) return floatTxt('Fondos insuficientes', 'text-rose-400');
+      lastBet.horses = bet;
+      racing = true;
+      S.money -= bet;
+      S.stats.games++;
+      updateHub();
+      save();
+      const betEl = document.getElementById('h-bet');
+      if (betEl) betEl.style.pointerEvents = 'none';
       document.getElementById('horse-list').classList.add('hidden');
-      const track=document.getElementById('race-track');
+      const track = document.getElementById('race-track');
       track.classList.remove('hidden');
-      track.innerHTML = horses.map(h=>`
-        <div class="flex items-center gap-2">
-          <div class="w-6 text-xs font-bold text-center" style="color:${h.color}">${h.num}</div>
-          <div class="horse-track flex-1 relative">
-            <div class="horse-runner" id="hr-${h.id}" style="left:2%;color:${h.color}">${h.id===selected?'⭐':'🏇'}</div>
+      // Misma anchura en todas las líneas: etiqueta fija a la derecha
+      track.innerHTML = horses.map(h => `
+        <div class="race-row flex items-center gap-1.5 w-full">
+          <div class="w-5 shrink-0 text-[11px] font-black text-center" style="color:${h.color}">${h.num}</div>
+          <div class="horse-track flex-1 relative min-w-0">
+            <div class="horse-runner" id="hr-${h.id}" style="left:2%">🏇</div>
           </div>
-          ${h.id===selected?'<span class="text-[9px] text-gold-400 font-bold">TÚ</span>':'<span class="w-6"></span>'}
+          <div class="w-7 shrink-0 text-center text-[9px] font-bold ${h.id === selected ? 'text-gold-400' : 'text-transparent'}">TÚ</div>
         </div>`).join('');
       sfx('click');
-      const b=getBonuses();
-      const progress=horses.map(()=>0);
-      const speeds=horses.map((h,i)=>{
-        let sp=h.speed+(Math.random()-0.5)*0.3;
-        if(i===selected) sp += (b.luck+b.horseLuck)*0.4;
-        return Math.max(0.4,sp);
+      const b = getBonuses();
+      const progress = horses.map(() => 0);
+      const speeds = horses.map((h, i) => {
+        let sp = h.speed + (Math.random() - 0.5) * 0.3;
+        if (i === selected) sp += (b.luck + b.horseLuck) * 0.4;
+        return Math.max(0.4, sp);
       });
-      const iv=setInterval(()=>{
-        let done=false;
-        for(let i=0;i<5;i++){
-          progress[i]+=speeds[i]*(0.8+Math.random()*0.5);
-          if(progress[i]>=100){progress[i]=100;done=true;}
-          const el=document.getElementById('hr-'+i);
-          if(el) el.style.left=Math.min(92,progress[i]*0.9)+'%';
+      const iv = setInterval(() => {
+        let done = false;
+        for (let i = 0; i < 5; i++) {
+          progress[i] += speeds[i] * (0.8 + Math.random() * 0.5);
+          if (progress[i] >= 100) { progress[i] = 100; done = true; }
+          const el = document.getElementById('hr-' + i);
+          if (el) el.style.left = Math.min(88, progress[i] * 0.86) + '%';
         }
-        if(done){
+        if (done) {
           clearInterval(iv);
-          let best=0,bestP=-1;
-          for(let i=0;i<5;i++) if(progress[i]>bestP||(progress[i]===bestP&&Math.random()>0.5)){bestP=progress[i];best=i;}
-          for(let i=0;i<5;i++){
-            const el=document.getElementById('hr-'+i);
-            if(el) el.style.left=(i===best?92:40+Math.random()*40)+'%';
+          let best = 0, bestP = -1;
+          for (let i = 0; i < 5; i++) {
+            if (progress[i] > bestP || (progress[i] === bestP && Math.random() > 0.5)) {
+              bestP = progress[i];
+              best = i;
+            }
           }
-          const msg=document.getElementById('race-msg');
-          if(best===selected){
-            const pure=applyWin(bet*3.5,'horses');
-            S.money+=pure; S.stats.won+=pure; sfx('win'); floatTxt('+'+fmt(pure));
-            msg.innerHTML=`<span class="text-emerald-400">¡#${horses[best].num} ${horses[best].name} gana! +${fmt(pure)}</span>`;
-            tryDropItem(true); registerPlay();
+          for (let i = 0; i < 5; i++) {
+            const el = document.getElementById('hr-' + i);
+            if (el) el.style.left = (i === best ? 88 : 35 + Math.random() * 40) + '%';
+          }
+          const msg = document.getElementById('race-msg');
+          if (best === selected) {
+            const pure = applyWin(bet * 3.5, 'horses');
+            S.money += pure;
+            S.stats.won += pure;
+            sfx('win');
+            floatTxt('+' + fmt(pure));
+            if (msg) msg.innerHTML = '<span class="text-emerald-400">¡#' + horses[best].num + ' ' + horses[best].name + ' gana! +' + fmt(pure) + '</span>';
+            tryDropItem(true);
+            registerPlay();
           } else {
-            S.stats.lost+=bet; sfx('lose');
-            msg.innerHTML=`<span class="text-rose-400">Gana #${horses[best].num} ${horses[best].name}. Tu caballo: #${horses[selected].num}</span>`;
-            tryDropItem(false); registerPlay();
+            S.stats.lost += bet;
+            sfx('lose');
+            if (msg) msg.innerHTML = '<span class="text-rose-400">Gana #' + horses[best].num + ' ' + horses[best].name + '. Tú: #' + horses[selected].num + '</span>';
+            tryDropItem(false);
+            registerPlay();
           }
-          save(); updateHub();
-          setTimeout(()=>{ racing=false; renderHorses(body); }, 2200);
+          save();
+          updateHub();
+          setTimeout(() => { racing = false; renderHorses(body); }, 2200);
         }
-      },80);
-    },0);
+      }, 80);
+    }, lastBet.horses || 0);
   }
   ui();
 }
