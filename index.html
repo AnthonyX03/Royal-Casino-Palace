@@ -41,17 +41,27 @@ body{font-family:'Inter',sans-serif;background:#0a0202;color:#e5e5e5;overflow:hi
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.15)}}
 .float-txt{position:fixed;animation:floatUp 1.3s ease-out forwards;pointer-events:none;font-weight:800;z-index:999;text-shadow:0 2px 6px #000}
 .inv-cell{aspect-ratio:1;min-width:0}
-.inv-cell.rarity-common{border-color:#6b7280}
-.inv-cell.rarity-uncommon{border-color:#22c55e}
-.inv-cell.rarity-rare{border-color:#3b82f6}
-.inv-cell.rarity-epic{border-color:#a855f7}
-.inv-cell.rarity-legendary{border-color:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.4)}
-.horse-track{position:relative;height:48px;background:linear-gradient(90deg,#1a3a1a,#0d1f0d);border-radius:8px;overflow:hidden;border:1px solid #2a5a2a}
-.horse-runner{position:absolute;top:50%;transform:translateY(-50%);transition:left 0.08s linear;font-size:1.6rem;filter:drop-shadow(0 2px 3px #000)}
-.numpad-btn{touch-action:manipulation}
+.rarity-common{border-color:#6b7280!important}
+.rarity-uncommon{border-color:#22c55e!important}
+.rarity-rare{border-color:#3b82f6!important}
+.rarity-epic{border-color:#a855f7!important}
+.rarity-legendary{border-color:#f59e0b!important;box-shadow:0 0 8px rgba(245,158,11,.45)}
+.horse-track{position:relative;height:44px;background:linear-gradient(90deg,#1a3a1a,#0d1f0d);border-radius:8px;overflow:hidden;border:1px solid #2a5a2a}
+.horse-runner{position:absolute;top:50%;transform:translateY(-50%);transition:left 0.08s linear;font-size:1.5rem;filter:drop-shadow(0 2px 3px #000)}
+.numpad-btn,.chip-btn,.rt-cell{touch-action:manipulation}
 .screen{display:none;height:100%;flex-direction:column}
 .screen.active{display:flex}
 .card-face{background:#fff;border-radius:6px;box-shadow:0 3px 8px rgba(0,0,0,.5)}
+.tab-btn.active-tab{background:#eab308!important;color:#000!important}
+.slot-cell{background:#0d0a0a;border:2px solid #a16207;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;min-height:56px}
+.slot-cell.payline{border-color:#facc15;box-shadow:0 0 12px rgba(250,204,21,.35);background:#1a1505}
+.rt-num{font-size:11px;font-weight:700;min-height:28px}
+.rt-num.red{background:#9f1239;color:#fff}
+.rt-num.black{background:#1e293b;color:#fff}
+.rt-num.green{background:#166534;color:#fff}
+.rt-num.selected{outline:2px solid #facc15;outline-offset:1px}
+.equip-slot{min-height:64px;border:2px dashed rgba(234,179,8,.35)}
+.equip-slot.filled{border-style:solid}
 </style>
 </head>
 <body class="h-full flex flex-col">
@@ -69,18 +79,18 @@ body{font-family:'Inter',sans-serif;background:#0a0202;color:#e5e5e5;overflow:hi
     <div class="text-left text-sm text-gray-300 leading-relaxed space-y-3 mb-6 bg-black/40 p-4 rounded-xl border border-white/5">
       <p><strong class="text-red-400">Las Vegas, 1978.</strong> El antiguo dueño desapareció una noche de tormenta. Solo quedó el edificio, las deudas… y un sobre con 500 dólares y una nota:</p>
       <p class="italic text-gold-300/90">«El azar no es ciego. Te observa. Cada ficha que ganas te acerca un poco más al abismo. Colecciona reliquias malditas. Multiplica tu fortuna. O muere en la miseria.»</p>
-      <p>No hay ingresos pasivos. No hay seguridad. Solo tú, las mesas, y los objetos que el casino te entregará… si sobrevives lo suficiente para merecerlos.</p>
+      <p>No hay ingresos pasivos. Solo tú, las mesas y los amuletos. Equipa hasta 5. Guarda 5 más. Vende lo que no necesites.</p>
       <div class="p-2 bg-red-950/60 border-l-4 border-red-500 rounded-r text-red-200 text-xs font-medium">
-        <i class="fa-solid fa-coins mr-1"></i> Capital inicial: <strong class="text-white">500 €</strong> — Que la fortuna te sea cruel.
+        <i class="fa-solid fa-coins mr-1"></i> Capital inicial: <strong class="text-white">500 €</strong>
       </div>
     </div>
     <form id="form-start" class="space-y-3 max-w-sm mx-auto">
       <div class="text-left">
         <label class="block text-[10px] uppercase tracking-widest text-gold-400 font-semibold mb-1">Nombre del Gerente</label>
         <input type="text" id="input-name" required maxlength="18" placeholder="Ej: Elias Crowe" value="Elias Crowe"
-          class="w-full bg-black/70 border border-gold-500/40 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-500/40">
+          class="w-full bg-black/70 border border-gold-500/40 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold-400">
       </div>
-      <button type="submit" class="w-full bg-gradient-to-r from-gold-700 via-gold-500 to-gold-400 hover:from-gold-600 hover:to-gold-300 text-black font-black tracking-wider uppercase py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition">
+      <button type="submit" class="w-full bg-gradient-to-r from-gold-700 via-gold-500 to-gold-400 text-black font-black tracking-wider uppercase py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition">
         Entrar al Infierno <i class="fa-solid fa-door-open ml-1"></i>
       </button>
     </form>
@@ -110,99 +120,105 @@ body{font-family:'Inter',sans-serif;background:#0a0202;color:#e5e5e5;overflow:hi
     </div>
   </header>
 
-  <nav class="flex-none flex bg-black/60 border-b border-white/5 px-2 py-1.5 gap-1 overflow-x-auto">
-    <button data-tab="play" class="tab-btn active flex-1 min-w-[70px] py-2 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 bg-gold-500 text-black">
+  <nav class="flex-none flex bg-black/60 border-b border-white/5 px-2 py-1.5 gap-1">
+    <button data-tab="play" class="tab-btn active-tab flex-1 min-w-[70px] py-2 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 text-gray-400">
       <i class="fa-solid fa-dice"></i><span>Jugar</span>
     </button>
-    <button data-tab="inventory" class="tab-btn flex-1 min-w-[70px] py-2 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 text-gray-400 hover:bg-white/5">
+    <button data-tab="inventory" class="tab-btn flex-1 min-w-[70px] py-2 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 text-gray-400">
       <i class="fa-solid fa-box-open"></i><span>Inventario</span>
     </button>
-    <button data-tab="stats" class="tab-btn flex-1 min-w-[70px] py-2 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 text-gray-400 hover:bg-white/5">
+    <button data-tab="stats" class="tab-btn flex-1 min-w-[70px] py-2 rounded-lg text-xs font-bold flex flex-col items-center gap-0.5 text-gray-400">
       <i class="fa-solid fa-chart-simple"></i><span>Stats</span>
     </button>
   </nav>
 
   <main class="flex-1 overflow-y-auto p-3">
+    <!-- PLAY -->
     <div id="tab-play" class="tab-panel space-y-3">
-      <p class="text-xs text-gray-500 text-center mb-1">Elige un juego. Las reliquias del inventario multiplican tus premios y suerte.</p>
+      <p class="text-xs text-gray-500 text-center">Equipa amuletos para potenciar premios y suerte.</p>
       <div class="grid grid-cols-2 gap-3">
-        <button data-game="slots" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20 hover:border-gold-500/50">
+        <button data-game="slots" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20">
           <div class="text-3xl mb-2">🎰</div>
-          <div class="font-cinzel font-bold text-gold-400 text-sm">Tragaperras</div>
-          <div class="text-[10px] text-gray-500 mt-0.5">Alinea símbolos malditos</div>
+          <div class="font-cinzel font-bold text-gold-400 text-sm">Tragaperras 3×3</div>
+          <div class="text-[10px] text-gray-500">Línea central paga</div>
         </button>
-        <button data-game="blackjack" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20 hover:border-gold-500/50">
+        <button data-game="blackjack" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20">
           <div class="text-3xl mb-2">🃏</div>
           <div class="font-cinzel font-bold text-gold-400 text-sm">Blackjack</div>
-          <div class="text-[10px] text-gray-500 mt-0.5">21 o la ruina</div>
+          <div class="text-[10px] text-gray-500">21 o la ruina</div>
         </button>
-        <button data-game="roulette" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20 hover:border-gold-500/50">
+        <button data-game="roulette" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20">
           <div class="text-3xl mb-2">🎡</div>
           <div class="font-cinzel font-bold text-gold-400 text-sm">Ruleta</div>
-          <div class="text-[10px] text-gray-500 mt-0.5">La rueda del destino</div>
+          <div class="text-[10px] text-gray-500">Tablero y fichas</div>
         </button>
-        <button data-game="poker" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20 hover:border-gold-500/50">
+        <button data-game="poker" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20">
           <div class="text-3xl mb-2">♠️</div>
           <div class="font-cinzel font-bold text-gold-400 text-sm">Video Poker</div>
-          <div class="text-[10px] text-gray-500 mt-0.5">Manos de la fortuna</div>
+          <div class="text-[10px] text-gray-500">Manos de la fortuna</div>
         </button>
-        <button data-game="horses" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20 hover:border-gold-500/50 col-span-2">
+        <button data-game="horses" class="game-card glass p-4 rounded-xl text-left active:scale-[0.98] transition border border-gold-500/20 col-span-2">
           <div class="flex items-center gap-3">
             <div class="text-3xl">🏇</div>
             <div>
               <div class="font-cinzel font-bold text-gold-400 text-sm">Carrera de Caballos</div>
-              <div class="text-[10px] text-gray-500 mt-0.5">Apuesta por el corcel del diablo</div>
+              <div class="text-[10px] text-gray-500">Apuesta por el corcel del diablo</div>
             </div>
           </div>
         </button>
       </div>
     </div>
 
-    <div id="tab-inventory" class="tab-panel hidden space-y-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="font-cinzel text-lg font-bold text-gold-400">Reliquias Malditas</h2>
-          <p class="text-[10px] text-gray-500">Objetos que amplifican suerte y premios. Se obtienen jugando.</p>
+    <!-- INVENTORY -->
+    <div id="tab-inventory" class="tab-panel hidden space-y-4">
+      <div>
+        <h2 class="font-cinzel text-lg font-bold text-gold-400">Equipo (máx. 5)</h2>
+        <p class="text-[10px] text-gray-500 mb-2">Solo los amuletos equipados dan bonos. No ocupan mochila.</p>
+        <div id="equip-grid" class="grid grid-cols-5 gap-1.5"></div>
+      </div>
+      <div>
+        <h2 class="font-cinzel text-lg font-bold text-gold-400">Mochila (máx. 5)</h2>
+        <p class="text-[10px] text-gray-500 mb-2">Guarda aquí. Equipa o vende desde el detalle.</p>
+        <div id="backpack-grid" class="grid grid-cols-5 gap-1.5"></div>
+        <div id="inv-empty" class="text-center py-6 text-gray-600 text-sm hidden">
+          <i class="fa-solid fa-box-open text-2xl mb-1 opacity-40"></i>
+          <p>Mochila vacía. Juega para encontrar reliquias.</p>
         </div>
-        <div class="text-right text-xs">
-          <div class="text-gray-500">Objetos</div>
-          <div id="inv-count" class="font-bold text-white">0 / ∞</div>
-        </div>
       </div>
-      <div class="flex gap-2 text-[10px] flex-wrap">
-        <span class="px-2 py-0.5 rounded border border-gray-600 text-gray-400">Común</span>
-        <span class="px-2 py-0.5 rounded border border-green-500 text-green-400">Poco común</span>
-        <span class="px-2 py-0.5 rounded border border-blue-500 text-blue-400">Raro</span>
-        <span class="px-2 py-0.5 rounded border border-purple-500 text-purple-400">Épico</span>
-        <span class="px-2 py-0.5 rounded border border-amber-500 text-amber-400">Legendario</span>
-      </div>
-      <div id="inventory-grid" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-1.5"></div>
-      <div id="inv-empty" class="text-center py-10 text-gray-600 text-sm">
-        <i class="fa-solid fa-box-open text-3xl mb-2 opacity-40"></i>
-        <p>Vacío. Gana partidas para encontrar reliquias.</p>
-      </div>
-      <div id="item-detail" class="hidden glass p-3 rounded-xl border border-gold-500/30">
+      <div id="item-detail" class="hidden glass p-3 rounded-xl border border-gold-500/30 space-y-2">
         <div class="flex gap-3">
           <div id="detail-icon" class="text-4xl"></div>
           <div class="flex-1 min-w-0">
-            <div id="detail-name" class="font-bold text-gold-300"></div>
+            <div id="detail-name" class="font-bold text-gold-300 text-sm"></div>
             <div id="detail-rarity" class="text-[10px] uppercase tracking-wider"></div>
             <div id="detail-desc" class="text-xs text-gray-400 mt-1"></div>
             <div id="detail-effects" class="text-xs text-emerald-400 mt-1 font-medium"></div>
+            <div id="detail-value" class="text-[10px] text-gray-500 mt-1"></div>
           </div>
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-equip" class="flex-1 py-2 rounded-lg bg-gold-600 text-black text-xs font-bold">Equipar</button>
+          <button id="btn-unequip" class="flex-1 py-2 rounded-lg bg-slate-700 text-xs font-bold hidden">Desequipar</button>
+          <button id="btn-sell" class="flex-1 py-2 rounded-lg bg-rose-900 border border-rose-500/40 text-rose-300 text-xs font-bold">Vender</button>
         </div>
       </div>
     </div>
 
+    <!-- STATS -->
     <div id="tab-stats" class="tab-panel hidden space-y-3">
       <h2 class="font-cinzel text-lg font-bold text-gold-400">Informe del Abismo</h2>
       <div class="grid grid-cols-2 gap-2">
         <div class="glass p-3 rounded-xl"><div class="text-[10px] text-gray-500">Partidas</div><div id="st-games" class="text-xl font-bold">0</div></div>
-        <div class="glass p-3 rounded-xl"><div class="text-[10px] text-gray-500">Ganado en apuestas</div><div id="st-won" class="text-xl font-bold text-emerald-400">0 €</div></div>
+        <div class="glass p-3 rounded-xl"><div class="text-[10px] text-gray-500">Ganado</div><div id="st-won" class="text-xl font-bold text-emerald-400">0 €</div></div>
         <div class="glass p-3 rounded-xl"><div class="text-[10px] text-gray-500">Perdido</div><div id="st-lost" class="text-xl font-bold text-rose-400">0 €</div></div>
         <div class="glass p-3 rounded-xl"><div class="text-[10px] text-gray-500">Reliquias halladas</div><div id="st-items" class="text-xl font-bold text-purple-300">0</div></div>
-        <div class="glass p-3 rounded-xl col-span-2"><div class="text-[10px] text-gray-500">Multiplicador de premios actual</div><div id="st-mult" class="text-xl font-bold text-gold-400">×1.00</div></div>
+        <div class="glass p-3 rounded-xl col-span-2"><div class="text-[10px] text-gray-500">Multiplicador (equipo)</div><div id="st-mult" class="text-xl font-bold text-gold-400">×1.00</div></div>
         <div class="glass p-3 rounded-xl col-span-2"><div class="text-[10px] text-gray-500">Bonus de suerte</div><div id="st-luck" class="text-xl font-bold text-blue-300">+0%</div></div>
+      </div>
+      <div>
+        <h3 class="font-cinzel text-base font-bold text-gold-400 mt-2">Álbum de Reliquias</h3>
+        <p class="text-[10px] text-gray-500 mb-2">Todas las que has descubierto alguna vez. <span id="album-count">0</span> vistas.</p>
+        <div id="album-grid" class="grid grid-cols-5 sm:grid-cols-6 gap-1.5 max-h-64 overflow-y-auto"></div>
       </div>
     </div>
   </main>
@@ -220,7 +236,7 @@ body{font-family:'Inter',sans-serif;background:#0a0202;color:#e5e5e5;overflow:hi
       <input type="range" id="vol-music" min="0" max="100" value="40" class="w-full accent-gold-500">
     </div>
     <div>
-      <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">Efectos de sonido</span><span id="vol-sfx-val">70%</span></div>
+      <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">Efectos</span><span id="vol-sfx-val">70%</span></div>
       <input type="range" id="vol-sfx" min="0" max="100" value="70" class="w-full accent-gold-500">
     </div>
     <button id="btn-mute-all" class="w-full py-2.5 rounded-xl bg-slate-800 border border-white/10 text-sm font-semibold">
@@ -230,7 +246,7 @@ body{font-family:'Inter',sans-serif;background:#0a0202;color:#e5e5e5;overflow:hi
     <button id="btn-reset" class="w-full py-2.5 rounded-xl bg-rose-950 border border-rose-500/40 text-rose-300 text-sm font-semibold">
       <i class="fa-solid fa-trash mr-1"></i> Reiniciar partida
     </button>
-    <p class="text-[10px] text-gray-600 text-center">PWA · En Android: menú del navegador → «Añadir a pantalla de inicio»</p>
+    <p class="text-[10px] text-gray-600 text-center">PWA · Android: menú → Añadir a pantalla de inicio</p>
   </div>
 </div>
 
@@ -249,9 +265,7 @@ body{font-family:'Inter',sans-serif;background:#0a0202;color:#e5e5e5;overflow:hi
   <div id="game-body" class="flex-1 overflow-y-auto p-3"></div>
 </div>
 
-<audio id="bg-music" loop preload="auto">
-  <source src="audio/Royal%20Casino%20Palace.mp3" type="audio/mpeg">
-</audio>
+<audio id="bg-music" preload="auto"></audio>
 
 <script src="game.js"></script>
 </body>
