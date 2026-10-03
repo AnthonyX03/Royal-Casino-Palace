@@ -737,15 +737,18 @@ body.layout-mobile #album-grid{
     </div>
     <p class="text-[10px] text-gray-500 text-center">Auto detecta PC (16:9) o móvil. También puedes forzar el modo.</p>
     <hr class="border-white/10">
-    <div class="text-[10px] uppercase tracking-wider text-gold-500 font-semibold">Partida</div>
+    <div class="text-[10px] uppercase tracking-wider text-gold-500 font-semibold">Divisa (solo visual)</div>
     <div class="grid grid-cols-2 gap-2">
-      <button id="btn-save-game" class="py-2.5 rounded-xl bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
-        <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar
+      <button type="button" id="btn-currency-eur" class="py-2.5 rounded-xl bg-slate-800 border border-gold-500/40 text-xs font-bold text-gold-300">
+        € Euro
       </button>
-      <button id="btn-load-game" class="py-2.5 rounded-xl bg-blue-900/80 border border-blue-500/40 text-blue-300 text-xs font-bold">
-        <i class="fa-solid fa-folder-open mr-1"></i> Cargar
+      <button type="button" id="btn-currency-usd" class="py-2.5 rounded-xl bg-slate-800 border border-white/10 text-xs font-bold">
+        $ Dólar
       </button>
     </div>
+    <p class="text-[10px] text-gray-500 text-center">No cambia el valor de las apuestas, solo el símbolo.</p>
+    <hr class="border-white/10">
+    <div class="text-[10px] uppercase tracking-wider text-gold-500 font-semibold">Partida</div>
     <button id="btn-reset" class="w-full py-2.5 rounded-xl bg-rose-950 border border-rose-500/40 text-rose-300 text-sm font-semibold">
       <i class="fa-solid fa-trash mr-1"></i> Reiniciar partida
     </button>
@@ -1455,7 +1458,7 @@ const S = {
   backpack: [],
   discovered: [],
   stats: { games: 0, won: 0, lost: 0, itemsFound: 0, debtsPaid: 0 },
-  settings: { music: 0.4, sfx: 0.7, muted: false, layout: 'auto' },
+  settings: { music: 0.4, sfx: 0.7, muted: false, layout: 'auto', currency: 'EUR' },
   // Deuda / run
   playsLeft: 10,
   debtAmount: 250,
@@ -1878,15 +1881,22 @@ function failDebt() {
   if (go) { go.classList.remove('hidden'); go.classList.add('flex'); go.style.display = 'flex'; }
 }
 
-function fullResetRun() {
-  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-  const settings = S.settings ? { ...S.settings } : { music: 0.4, sfx: 0.7, muted: false, layout: 'auto' };
+function fullResetRun(opts) {
+  const keepAlbum = !!(opts && opts.keepAlbum);
+  const settings = S.settings ? { ...S.settings } : { music: 0.4, sfx: 0.7, muted: false, layout: 'auto', currency: 'EUR' };
+  const albumKeep = keepAlbum ? [...(S.discovered || [])] : [];
+  const itemsFoundKeep = keepAlbum ? (S.stats && S.stats.itemsFound) || albumKeep.length : 0;
+
+  if (!keepAlbum) {
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  }
+
   S.name = '';
   S.money = 100;
   S.equipment = [];
   S.backpack = [];
-  S.discovered = [];
-  S.stats = { games: 0, won: 0, lost: 0, itemsFound: 0, debtsPaid: 0 };
+  S.discovered = albumKeep;
+  S.stats = { games: 0, won: 0, lost: 0, itemsFound: itemsFoundKeep, debtsPaid: 0 };
   S.playsLeft = 10;
   S.debtAmount = 250;
   S.debtRound = 1;
@@ -1898,6 +1908,7 @@ function fullResetRun() {
   S.settings = settings;
   window.__rcpGameStarted = false;
   window.__rcpPendingName = null;
+
   const go = document.getElementById('modal-gameover');
   if (go) { go.classList.add('hidden'); go.style.display = 'none'; go.classList.remove('flex'); }
   const debtM = document.getElementById('modal-debt');
@@ -1905,8 +1916,15 @@ function fullResetRun() {
   try { closeGame(); } catch (e) {}
   const nameInput = document.getElementById('input-name');
   if (nameInput) nameInput.value = '';
-  showScreen('intro');
-  floatTxt('Partida borrada', 'text-rose-300');
+
+  if (keepAlbum) {
+    try { save(); } catch (e) {}
+    showScreen('intro');
+    floatTxt(albumKeep.length ? ('Álbum intacto · ' + albumKeep.length + ' descubiertas') : 'Nueva condena', 'text-gold-300');
+  } else {
+    showScreen('intro');
+    floatTxt('Partida y álbum borrados', 'text-rose-300');
+  }
 }
 
 function shopRerollCost() {
@@ -2070,13 +2088,35 @@ function load() {
       if (!S.discovered) S.discovered = [];
       if (!S.settings) S.settings = { music:0.4, sfx:0.7, muted:false, layout:'auto' };
       if (!S.settings.layout) S.settings.layout = 'auto';
+      if (!S.settings.currency) S.settings.currency = 'EUR';
       return true;
     }
   } catch(e){}
   return false;
 }
 
-function fmt(n){ return Math.floor(n).toLocaleString('es-ES') + ' €'; }
+function currencySymbol() {
+  return (S.settings && S.settings.currency === 'USD') ? '$' : '€';
+}
+function fmt(n) {
+  const v = Math.floor(Number(n) || 0).toLocaleString('es-ES');
+  return (S.settings && S.settings.currency === 'USD') ? ('$ ' + v) : (v + ' €');
+}
+function updateCurrencyButtons() {
+  const eur = document.getElementById('btn-currency-eur');
+  const usd = document.getElementById('btn-currency-usd');
+  const isUsd = S.settings && S.settings.currency === 'USD';
+  if (eur) {
+    eur.classList.toggle('border-gold-500/40', !isUsd);
+    eur.classList.toggle('text-gold-300', !isUsd);
+    eur.classList.toggle('border-white/10', isUsd);
+  }
+  if (usd) {
+    usd.classList.toggle('border-gold-500/40', isUsd);
+    usd.classList.toggle('text-gold-300', isUsd);
+    usd.classList.toggle('border-white/10', !isUsd);
+  }
+}
 function floatTxt(txt, color='text-emerald-400') {
   const el = document.createElement('div');
   el.className = `float-txt ${color} text-lg`;
@@ -3234,7 +3274,7 @@ function bindAllUI() {
   const an = document.getElementById('album-next');
   if (an) an.onclick = function () { albumPageDelta(1); };
   const restart = document.getElementById('btn-restart-run');
-  if (restart) restart.onclick = function () { fullResetRun(); };
+  if (restart) restart.onclick = function () { fullResetRun({ keepAlbum: true }); };
   const shopReroll = document.getElementById('btn-shop-reroll');
   if (shopReroll) shopReroll.onclick = function () {
     const c = shopRerollCost();
@@ -3307,24 +3347,33 @@ function bindAllUI() {
     floatTxt(S.settings.layout === 'pc' ? 'Modo PC 16:9' : 'Modo Móvil', 'text-gold-300');
   };
 
-  const saveBtn = document.getElementById('btn-save-game');
-  if (saveBtn) saveBtn.onclick = function () {
-    save(); floatTxt('Partida guardada', 'text-emerald-400'); try { sfx('coin'); } catch (e) {}
-  };
-  const loadBtn = document.getElementById('btn-load-game');
-  if (loadBtn) loadBtn.onclick = function () {
-    if (load()) {
-      applyLayoutSafe(); applyVolumes(); updateHub();
-      floatTxt('Partida cargada', 'text-blue-300');
-    } else floatTxt('No hay partida guardada', 'text-rose-400');
-  };
+  
+  
   const resetBtn = document.getElementById('btn-reset');
   if (resetBtn) resetBtn.onclick = function () {
-    if (confirm('¿Reiniciar todo? Se perderán amuletos y dinero.')) {
-      localStorage.removeItem(SAVE_KEY);
+    if (confirm('¿Reiniciar TODO? Se borrarán dinero, inventario y el ÁLBUM de reliquias descubiertas.')) {
+      fullResetRun({ keepAlbum: false });
+      try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
       location.reload();
     }
   };
+  const curEur = document.getElementById('btn-currency-eur');
+  const curUsd = document.getElementById('btn-currency-usd');
+  if (curEur) curEur.onclick = function () {
+    S.settings.currency = 'EUR';
+    updateCurrencyButtons();
+    updateHub();
+    save();
+    try { sfx('click'); } catch (e) {}
+  };
+  if (curUsd) curUsd.onclick = function () {
+    S.settings.currency = 'USD';
+    updateCurrencyButtons();
+    updateHub();
+    save();
+    try { sfx('click'); } catch (e) {}
+  };
+  try { updateCurrencyButtons(); } catch (e) {}
 
   // Inventory buttons
   const be = document.getElementById('btn-equip');
