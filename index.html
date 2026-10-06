@@ -91,30 +91,6 @@ body.layout-mobile .intro-card{width:min(100%,26rem);max-height:92dvh}
 .equip-slot{min-height:64px;border:2px dashed rgba(234,179,8,.35)}
 .equip-slot.filled{border-style:solid}
 .paytable{font-size:11px;color:#a8a29e}
-
-/* Cartas — Poker y Blackjack: siempre visibles y adaptadas a móvil */
-.card-face{
-  background:linear-gradient(145deg,#ffffff 0%,#f1f5f9 100%)!important;
-  color:#111827;
-  border:2px solid rgba(255,255,255,.9)!important;
-  border-radius:10px!important;
-  box-shadow:0 3px 8px rgba(0,0,0,.45),inset 0 0 0 1px rgba(15,23,42,.12);
-  flex:0 0 auto;
-  overflow:hidden;
-  position:relative;
-}
-.card-face.text-red-600{color:#dc2626!important}
-#pk-cards{overflow:visible;flex-wrap:nowrap;min-width:0}
-#pk-cards .card-face{width:clamp(46px,14vw,54px)!important;height:clamp(64px,20vw,74px)!important;font-size:clamp(.78rem,3.5vw,.9rem)!important}
-#pk-cards .card-face .text-\[8px\]{line-height:1}
-.bj-card{width:clamp(46px,14vw,52px)!important;height:clamp(62px,19vw,70px)!important;font-size:clamp(.78rem,3.5vw,.9rem)!important}
-.bj-card .text-base{font-size:1rem!important}
-body.layout-mobile #pk-cards{gap:clamp(3px,1.4vw,6px)!important}
-body.layout-mobile .card-face{box-shadow:0 2px 7px rgba(0,0,0,.5),inset 0 0 0 1px rgba(15,23,42,.12)}
-@media (max-width:360px){
-  #pk-cards .card-face{width:45px!important;height:63px!important}
-  .bj-card{width:45px!important;height:61px!important}
-}
 .paytable b{color:#facc15}
 .album-locked{opacity:.35;filter:grayscale(1)}
 
@@ -303,10 +279,13 @@ body.layout-pc .horses-layout{
 body.layout-pc .slot-layout > *,
 body.layout-pc .roulette-layout > *,
 body.layout-pc .bj-layout > *,
-body.layout-pc .poker-layout > *,
-body.layout-pc .horses-layout > *{
+body.layout-pc .poker-layout > *{
   min-height:0;
   overflow:hidden;
+}
+body.layout-pc .horses-layout > *{
+  min-height:0;
+  overflow:auto;
 }
 body.layout-mobile .slot-layout,
 body.layout-mobile .roulette-layout,
@@ -394,49 +373,60 @@ img.relic-icon{
 #detail-icon img.relic-icon, #item-detail img.relic-icon{width:3rem;height:3rem}
 
 
-/* Carrera de caballos — móvil sin cortes ni scroll */
+/* Carrera de caballos — PC 2 columnas / móvil vertical */
 .horses-layout{
-  display:flex!important;
-  flex-direction:column!important;
   height:100%;
   min-height:0;
-  gap:0.4rem;
+  gap:0.5rem;
   overflow:hidden!important;
 }
+body.layout-mobile .horses-layout{
+  display:flex!important;
+  flex-direction:column!important;
+}
+body.layout-pc .horses-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.45fr) minmax(280px,1fr);
+  gap:1.25rem;
+  align-items:stretch;
+}
 .horses-top{
-  flex:1 1 auto;
   min-height:0;
   display:flex;
   flex-direction:column;
-  gap:0.3rem;
+  gap:0.35rem;
   overflow:hidden;
+}
+body.layout-pc .horses-top{
+  height:100%;
+  overflow:auto;
+  overscroll-behavior:contain;
 }
 .horse-list-grid{
   display:flex;
   flex-direction:column;
-  gap:0.28rem;
+  gap:0.3rem;
   flex:1 1 auto;
   min-height:0;
 }
 .horse-sel{
   box-sizing:border-box!important;
   border-width:2px!important;
-  flex:1 1 0;
-  min-height:2.35rem;
-  max-height:3.1rem;
+  flex:0 0 auto;
+  min-height:2.5rem;
 }
 .horse-sel.picked{box-shadow:0 0 0 1px #facc15 inset,0 0 12px rgba(250,204,21,.25)}
 .race-track-wrap{
   display:flex;
   flex-direction:column;
-  gap:0.28rem;
+  gap:0.3rem;
   flex:1 1 auto;
   min-height:0;
 }
 .race-row{width:100%;min-width:0}
 .horse-track{
   position:relative;
-  height:36px;
+  height:38px;
   background:linear-gradient(90deg,#1a3a1a,#0d1f0d);
   border-radius:8px;
   overflow:hidden;
@@ -447,34 +437,37 @@ img.relic-icon{
   top:50%;
   transform:translateY(-50%);
   transition:left 0.08s linear;
-  font-size:1.35rem;
+  font-size:1.4rem;
   filter:drop-shadow(0 2px 3px #000);
   line-height:1;
 }
-.horses-controls{flex:0 0 auto;max-height:42%;overflow:hidden}
-body.layout-mobile .horses-controls{flex:0 0 auto;max-height:none;overflow:visible}
-body.layout-mobile .horse-sel{min-height:clamp(2.3rem,5.8vh,3rem);max-height:clamp(2.55rem,7vh,3.25rem);padding:0.28rem 0.5rem!important}
-body.layout-mobile .horse-list-grid{gap:clamp(0.32rem,0.7vh,0.45rem)}
-body.layout-mobile .horse-track{height:clamp(36px,5.5vh,42px)}
-body.layout-mobile .horse-sel .w-7{width:2rem!important;height:2rem!important}
-body.layout-mobile .horse-sel .text-lg{font-size:1.35rem!important}
-body.layout-mobile .bet-indicator{font-size:0.68rem!important;padding:0.25rem 0.35rem!important}
-body.layout-mobile .race-msg{font-size:0.68rem!important}
-body.layout-mobile .horses-controls .numpad-btn{padding:0!important;height:1.85rem!important;min-height:1.85rem!important}
-body.layout-mobile .horses-controls #np-display{font-size:1.15rem!important;margin-bottom:0.15rem!important}
-body.layout-mobile .horses-controls .glass{padding:0.4rem!important;margin-bottom:0.25rem!important}
-body.layout-mobile .horses-controls #np-go{padding-top:0.65rem!important;padding-bottom:0.65rem!important;font-size:0.95rem!important}
-body.layout-mobile .horses-controls .grid.grid-cols-4{margin-top:0.35rem!important}
-@media (max-height:600px){
-  body.layout-mobile .horse-sel{min-height:2.15rem;max-height:2.65rem;padding:0.2rem 0.42rem!important}
-  body.layout-mobile .horse-sel .w-7{width:1.8rem!important;height:1.8rem!important}
-  body.layout-mobile .horse-track{height:34px}
-  body.layout-mobile .horse-sel .text-lg{font-size:1.2rem!important}
+.horses-controls{
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  display:flex;
+  flex-direction:column;
 }
-body.layout-pc .horse-list-grid{gap:0.4rem}
-body.layout-pc .horse-sel{min-height:2.6rem;max-height:none;flex:0 0 auto}
-
-
+body.layout-pc .horses-controls{
+  height:100%;
+  max-height:none;
+  overflow:auto;
+  padding-right:0.15rem;
+}
+body.layout-pc .horses-controls .glass{margin-bottom:0.5rem}
+body.layout-pc .horses-controls #np-go{margin-top:auto}
+body.layout-mobile .horses-controls{flex:0 0 auto;max-height:40%;overflow:auto}
+body.layout-mobile .horse-sel{min-height:2.15rem;max-height:2.7rem;padding:0.25rem 0.4rem!important;flex:1 1 0}
+body.layout-mobile .horse-list-grid{flex:1 1 auto}
+body.layout-mobile .horse-track{height:32px}
+body.layout-mobile .bet-indicator{font-size:0.7rem!important;padding:0.3rem 0.4rem!important}
+body.layout-mobile .race-msg{font-size:0.7rem!important}
+body.layout-mobile .horses-controls .numpad-btn{padding:0.35rem 0!important;height:2.15rem!important}
+body.layout-mobile .horses-controls #np-display{font-size:1.25rem!important;margin-bottom:0.25rem!important}
+body.layout-mobile .horses-controls .glass{padding:0.5rem!important;margin-bottom:0.35rem!important}
+body.layout-pc .horse-list-grid{gap:0.45rem}
+body.layout-pc .horse-sel{min-height:2.75rem;padding:0.55rem 0.75rem!important}
+body.layout-pc .bet-indicator{font-size:0.85rem;padding:0.55rem 0.75rem}
 
 .tab-panel.hidden{display:none!important}
 #tab-album.hidden,#tab-play.hidden,#tab-inventory.hidden,#tab-shop.hidden,#tab-stats.hidden{display:none!important}
@@ -750,7 +743,7 @@ body.layout-mobile #album-grid{
           <p class="text-[11px] text-gray-500">5 reliquias. Se renueva gratis en cada cobro.</p>
         </div>
         <button id="btn-shop-reroll" class="px-3 py-2 rounded-xl bg-slate-800 border border-gold-500/30 text-xs font-bold text-gold-300">
-          <i class="fa-solid fa-dice mr-1"></i>Rerolear <span id="shop-reroll-cost">100 €</span>
+          <i class="fa-solid fa-dice mr-1"></i>Rerolear <span id="shop-reroll-cost">100</span>€
         </button>
       </div>
       <div id="shop-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
@@ -1554,7 +1547,7 @@ const ABILITY_DEFS = [
   { key:'critChance', label:v=>`Crítico ${Math.round(v*100)}% (×2)`, gen:r=>+(0.06 + r*0.06 + Math.random()*0.05).toFixed(3) },
   { key:'freeSpin', label:v=>`Giro gratis ${Math.round(v*100)}%`, gen:r=>+(0.06 + r*0.05 + Math.random()*0.05).toFixed(3) },
   { key:'dropBoost', label:v=>`Más reliquias +${Math.round(v*100)}%`, gen:r=>+(0.1 + r*0.1 + Math.random()*0.08).toFixed(3) },
-  { key:'startBoost', label:v=>`+${fmt(v)} al ganar`, gen:r=>Math.floor(8 + r*35 + Math.random()*25) },
+  { key:'startBoost', label:v=>`+${v}€ al ganar`, gen:r=>Math.floor(8 + r*35 + Math.random()*25) },
   { key:'insurance', label:v=>`Seguro apuesta ${Math.round(v*100)}%`, gen:r=>+(0.08 + r*0.08 + Math.random()*0.06).toFixed(3) },
   { key:'allGames', label:v=>`Todos los juegos ×${v.toFixed(2)}`, gen:r=>+(1.1 + r*0.12 + Math.random()*0.1).toFixed(2) },
   { key:'equipSlots', label:v=>`+${v} ranura(s) de equipo`, gen:r=>Math.max(1, 1 + (r >= 2 ? 1 : 0) + (r >= 4 ? 1 : 0)) },
@@ -2011,19 +2004,10 @@ function rollShop(free) {
   save();
 }
 
-function localizeCurrencyText(text) {
-  if (text == null) return '';
-  return String(text).replace(/([+−-]?\d+(?:[.,]\d+)?)\s*€/g, (match, amount) => {
-    const clean = amount.replace(',', '.');
-    const shown = Number.isFinite(Number(clean)) ? Math.floor(Number(clean)).toLocaleString('es-ES') : amount;
-    return S.settings && S.settings.currency === 'USD' ? ('$ ' + shown) : (shown + ' €');
-  });
-}
-
 function renderShop() {
   const g = document.getElementById('shop-grid');
   const costEl = document.getElementById('shop-reroll-cost');
-  if (costEl) costEl.textContent = fmt(shopRerollCost());
+  if (costEl) costEl.textContent = shopRerollCost();
   if (!g) return;
   if (!S.shop || !S.shop.length) { rollShop(true); return; }
   g.innerHTML = S.shop.map((it, idx) => `
@@ -2032,8 +2016,8 @@ function renderShop() {
       <div class="flex-1 min-w-0">
         <div class="font-bold text-sm text-white truncate">${it.name}</div>
         <div class="text-[10px] font-semibold" style="color:${it.color}">${it.rarityName}</div>
-        <div class="text-[11px] text-emerald-300 mt-1">${localizeCurrencyText(it.effectsText)}</div>
-        <div class="text-[10px] text-gray-500 mt-1 line-clamp-2">${localizeCurrencyText(it.desc)}</div>
+        <div class="text-[11px] text-emerald-300 mt-1">${it.effectsText}</div>
+        <div class="text-[10px] text-gray-500 mt-1 line-clamp-2">${it.desc}</div>
         <button data-shop-buy="${idx}" class="mt-2 px-3 py-1.5 rounded-lg bg-emerald-700 text-xs font-bold text-white">Comprar ${fmt(it.buy)}</button>
       </div>
     </div>
@@ -2317,8 +2301,8 @@ function showDetail(it, isEquipped) {
   document.getElementById('detail-name').textContent = it.name;
   document.getElementById('detail-rarity').textContent = it.rarityName;
   document.getElementById('detail-rarity').style.color = it.color;
-  document.getElementById('detail-desc').textContent = localizeCurrencyText(it.desc);
-  document.getElementById('detail-effects').textContent = localizeCurrencyText(it.effectsText);
+  document.getElementById('detail-desc').textContent = it.desc;
+  document.getElementById('detail-effects').textContent = it.effectsText;
   document.getElementById('detail-value').textContent = 'Venta: ' + fmt(it.sell);
   document.getElementById('btn-equip').classList.toggle('hidden', isEquipped);
   document.getElementById('btn-unequip').classList.toggle('hidden', !isEquipped);
@@ -2463,7 +2447,7 @@ function wireNumpad(onConfirm, startVal) {
       const k = btn.dataset.k;
       if (k==='C') val='0';
       else if (k==='⌫') val = val.slice(0,-1)||'0';
-      else { if(val==='0') val=k; else if(val.length<7) val+=k; }
+      else { if(val==='0') val=k; else val+=k; }
       update();
     };
   });
@@ -2473,7 +2457,7 @@ function wireNumpad(onConfirm, startVal) {
   const go = document.getElementById('np-go');
   if (go) go.onclick = () => {
     const n = parseInt(val,10)||0;
-    if (n<1) return floatTxt('Apuesta mínima ' + fmt(1), 'text-rose-400');
+    if (n<1) return floatTxt('Apuesta mínima 1','text-rose-400');
     if (n>S.money) return floatTxt('Fondos insuficientes','text-rose-400');
     onConfirm(n);
   };
@@ -2670,8 +2654,8 @@ function handVal(h){
   return t;
 }
 function cardHtml(c,hide){
-  if(hide) return `<div class="bj-card w-12 h-16 rounded-md bg-slate-800 border-2 border-gold-600 flex items-center justify-center text-gold-500 text-lg">🂠</div>`;
-  return `<div class="card-face bj-card w-12 h-16 flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'}"><span>${c.v}</span><span class="text-base">${c.s}</span></div>`;
+  if(hide) return `<div class="w-12 h-16 rounded-md bg-slate-800 border-2 border-gold-600 flex items-center justify-center text-gold-500 text-lg">🂠</div>`;
+  return `<div class="card-face w-12 h-16 flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'}"><span>${c.v}</span><span class="text-base">${c.s}</span></div>`;
 }
 
 function renderBJ(body) {
@@ -2953,7 +2937,7 @@ function renderPoker(body) {
           <div class="text-[10px] text-green-300/60 mb-2 text-center">${phase==='hold'?'Toca para MANTENER':'Tu mano'}</div>
           <div id="pk-cards" class="flex justify-center gap-1.5 min-h-[70px]">
             ${(hand||[]).map((c,i)=>`
-              <button data-i="${i}" class="card-face flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'} ${holds&&holds[i]?'ring-2 ring-gold-400 scale-105':''}">
+              <button data-i="${i}" class="card-face w-[52px] h-[72px] flex flex-col items-center justify-center text-sm font-bold ${c.red?'text-red-600':'text-slate-900'} ${holds&&holds[i]?'ring-2 ring-gold-400 scale-105':''}">
                 ${holds&&holds[i]?'<span class="text-[8px] text-amber-600 font-black">HOLD</span>':''}
                 <span>${c.v}</span><span>${c.s}</span>
               </button>`).join('')||'—'}
