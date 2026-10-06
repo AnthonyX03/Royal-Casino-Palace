@@ -743,7 +743,7 @@ body.layout-mobile #album-grid{
           <p class="text-[11px] text-gray-500">5 reliquias. Se renueva gratis en cada cobro.</p>
         </div>
         <button id="btn-shop-reroll" class="px-3 py-2 rounded-xl bg-slate-800 border border-gold-500/30 text-xs font-bold text-gold-300">
-          <i class="fa-solid fa-dice mr-1"></i>Rerolear <span id="shop-reroll-cost">100</span>€
+          <i class="fa-solid fa-dice mr-1"></i>Rerolear <span id="shop-reroll-cost">100</span><span id="shop-reroll-cur">€</span>
         </button>
       </div>
       <div id="shop-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
@@ -806,9 +806,14 @@ body.layout-mobile #album-grid{
     <p class="text-[10px] text-gray-500 text-center">No cambia el valor de las apuestas, solo el símbolo.</p>
     <hr class="border-white/10">
     <div class="text-[10px] uppercase tracking-wider text-gold-500 font-semibold">Partida</div>
-    <button id="btn-reset" class="w-full py-2.5 rounded-xl bg-rose-950 border border-rose-500/40 text-rose-300 text-sm font-semibold">
-      <i class="fa-solid fa-trash mr-1"></i> Reiniciar partida
+    <button type="button" id="btn-restart-run-settings" class="w-full py-2.5 rounded-xl bg-amber-950 border border-amber-500/40 text-amber-200 text-sm font-semibold">
+      <i class="fa-solid fa-rotate-left mr-1"></i> Reiniciar run
     </button>
+    <p class="text-[10px] text-gray-500 text-center -mt-1">Vuelve a 100, deuda y tienda. <strong class="text-gray-400">No borra el álbum</strong>.</p>
+    <button id="btn-reset" class="w-full py-2.5 rounded-xl bg-rose-950 border border-rose-500/40 text-rose-300 text-sm font-semibold">
+      <i class="fa-solid fa-trash mr-1"></i> Borrar TODO
+    </button>
+    <p class="text-[10px] text-gray-600 text-center -mt-1">Incluye álbum descubierto. No se puede deshacer.</p>
     <p class="text-[10px] text-gray-600 text-center">PWA · Android: menú → Añadir a pantalla de inicio</p>
   </div>
 </div>
@@ -1931,6 +1936,25 @@ function payEarly() {
   updateHub(); save();
 }
 
+
+function checkBankrupt() {
+  if (S.money > 0) return false;
+  S.money = 0;
+  try { save(); } catch (e) {}
+  try { closeGame(); } catch (e) {}
+  const debtM = document.getElementById('modal-debt');
+  if (debtM) { debtM.classList.add('hidden'); debtM.style.display = 'none'; }
+  const go = document.getElementById('modal-gameover');
+  if (go) {
+    const p = go.querySelector('p');
+    if (p) p.textContent = 'Te has quedado sin fondos. El Palace te expulsa… pero tu álbum de reliquias permanece.';
+    go.classList.remove('hidden');
+    go.classList.add('flex');
+    go.style.display = 'flex';
+  }
+  return true;
+}
+
 function failDebt() {
   const modal = document.getElementById('modal-debt');
   if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
@@ -2008,6 +2032,8 @@ function renderShop() {
   const g = document.getElementById('shop-grid');
   const costEl = document.getElementById('shop-reroll-cost');
   if (costEl) costEl.textContent = shopRerollCost();
+  const curEl = document.getElementById('shop-reroll-cur');
+  if (curEl) curEl.textContent = currencySymbol();
   if (!g) return;
   if (!S.shop || !S.shop.length) { rollShop(true); return; }
   g.innerHTML = S.shop.map((it, idx) => `
@@ -2190,6 +2216,10 @@ function updateHub() {
   set('hub-name', S.name || '—');
   set('hub-money', fmt(S.money));
   set('game-money', fmt(S.money));
+  const src = document.getElementById('shop-reroll-cur');
+  if (src) src.textContent = currencySymbol();
+  const srcCost = document.getElementById('shop-reroll-cost');
+  if (srcCost) try { srcCost.textContent = shopRerollCost(); } catch(e){}
   set('hub-debt', fmt(getDebtDue()));
   set('hub-plays', String(S.playsLeft ?? 10));
   set('hub-round', String(S.debtRound ?? 1));
@@ -2215,6 +2245,16 @@ function updateHub() {
   try { renderInventory(); } catch (e) { console.warn(e); }
   try { renderAlbum(); } catch (e) { console.warn(e); }
   try { renderShop(); } catch (e) {}
+  // Derrota automática sin fondos (no durante el cobro de deuda si aún puede fallar ahí)
+  if (S.money <= 0 && window.__rcpGameStarted) {
+    const debtOpen = document.getElementById('modal-debt');
+    const goOpen = document.getElementById('modal-gameover');
+    const debtVisible = debtOpen && !debtOpen.classList.contains('hidden') && debtOpen.style.display !== 'none';
+    const goVisible = goOpen && !goOpen.classList.contains('hidden') && goOpen.style.display !== 'none';
+    if (!debtVisible && !goVisible) {
+      setTimeout(() => { if (S.money <= 0) checkBankrupt(); }, 400);
+    }
+  }
 }
 
 function registerDiscovered(item) {
@@ -3425,9 +3465,18 @@ function bindAllUI() {
 
   
   
+  const restartRunBtn = document.getElementById('btn-restart-run-settings');
+  if (restartRunBtn) restartRunBtn.onclick = function () {
+    if (!confirm('¿Reiniciar la run? Dinero, inventario y deuda se reinician. El ÁLBUM se conserva.')) return;
+    // Cerrar ajustes
+    const ms = document.getElementById('modal-settings');
+    if (ms) { ms.classList.add('hidden'); ms.style.display = 'none'; }
+    fullResetRun({ keepAlbum: true });
+    try { sfx('click'); } catch (e) {}
+  };
   const resetBtn = document.getElementById('btn-reset');
   if (resetBtn) resetBtn.onclick = function () {
-    if (confirm('¿Reiniciar TODO? Se borrarán dinero, inventario y el ÁLBUM de reliquias descubiertas.')) {
+    if (confirm('¿Borrar TODO? Se perderán dinero, inventario y el ÁLBUM de reliquias descubiertas.')) {
       fullResetRun({ keepAlbum: false });
       try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
       location.reload();
